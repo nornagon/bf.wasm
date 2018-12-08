@@ -5,7 +5,7 @@ Compile [brainfuck](https://en.wikipedia.org/wiki/Brainfuck) to
 
 ### Running
 
-```sh
+```
 $ node bf.js
 Hello world!
 ```
