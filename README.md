@@ -1,0 +1,30 @@
+# bf.wasm
+
+Compile brainfuck to WebAssembly
+
+### Running
+
+```sh
+$ node bf.js
+Hello world!
+```
+
+(Right now, the brainfuck code is just a constant inside `bf.js`, because
+:shrug:)
+
+### ... why?
+
+I wanted to get familiar with the WebAssembly binary format, and this seemed
+like a fun way to do it!
+
+### But is any of this useful at all?
+
+`wasm-gen.js` contains a code generator for WebAssembly, which might be useful
+to you if you're interested in doing something with the WebAssembly binary
+format that's more valuable than compiling Brainfuck :)
+
+### License
+
+This code is licensed under the [AGPL v3](license.txt), but I'm happy to grant
+you permission to use this code under different terms at no charge. Just [email
+me](mailto:nornagon@nornagon.net)!
