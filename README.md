@@ -26,6 +26,6 @@ format that's more valuable than compiling Brainfuck :)
 
 ### License
 
-This code is licensed under the [AGPL v3](license.txt), but I'm happy to grant
+This code is licensed under the [AGPL v3](license.txt), but if for some reason you want to compile Brainfuck to WebAssembly in your proprietary Business Systems, I'm happy to grant
 you permission to use this code under different terms at no charge. Just [email
 me](mailto:nornagon@nornagon.net)!
