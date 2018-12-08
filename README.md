@@ -1,6 +1,7 @@
 # bf.wasm
 
-Compile brainfuck to WebAssembly
+Compile [brainfuck](https://en.wikipedia.org/wiki/Brainfuck) to
+[WebAssembly](https://webassembly.org/)
 
 ### Running
 
