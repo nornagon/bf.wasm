@@ -10,7 +10,7 @@ $ node bf.js
 Hello world!
 ```
 
-(Right now, the brainfuck code is just a constant inside `bf.js`, because
+(Right now, the brainfuck code is just a [constant inside `bf.js`](bf.js#L31), because
 :shrug:)
 
 ### ... why?
