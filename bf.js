@@ -1,24 +1,19 @@
 const wasm = require('./wasm-gen')
-const {varint32, varuint32, varint7} = wasm
 
 const m = new wasm.Module
-m.type_section.add(new wasm.FuncType([])) // () => void
-m.type_section.add(new wasm.FuncType([wasm.type.i32])) // (i32) => void
-m.type_section.add(new wasm.FuncType([], wasm.type.i32)) // () => i32
+m.addMemory(1)
 
-m.import_section.add(new wasm.ImportEntry(
-  "io", "write", wasm.external_kind.func,
-  new wasm.FunctionImportType(1)
-))
-m.import_section.add(new wasm.ImportEntry(
-  "io", "read", wasm.external_kind.func,
-  new wasm.FunctionImportType(2)
-))
-m.function_section.add(new wasm.Index(0)) // run()
-m.export_section.add(new wasm.ExportEntry("run", wasm.external_kind.func, 2))
-m.memory_section.add(new wasm.MemoryType(1))
-const f = new wasm.FuncBody()
-f.locals.add(new wasm.LocalEntry(1, wasm.type.i32)) // $p
+const voidToVoid = m.addType(new wasm.FuncType([])) // () => void
+const i32ToVoid = m.addType(new wasm.FuncType([wasm.type.i32])) // (i32) => void
+const voidToI32 = m.addType(new wasm.FuncType([], wasm.type.i32)) // () => i32
+
+m.importFunction("io", "write", i32ToVoid)
+m.importFunction("io", "read", voidToI32)
+
+m.exportFunction("run", 2)
+
+const f = m.addFunction(voidToVoid) // run()
+f.addLocal(wasm.type.i32) // $p
 
 f.code
   .i32_const(0)
@@ -135,12 +130,11 @@ for (let c of bf_string) {
 }
 
 f.code.return()
-m.code_section.add(new wasm.SizedSection(f))
 
 WebAssembly.instantiate(m.toBuffer(), {
   io: {
-    read: () => { throw new Error("can't read yet") },
     write: (c) => { process.stdout.write(String.fromCharCode(c)) },
+    read: () => { throw new Error("can't read yet") },
   }
 }).then(result => {
   result.instance.exports.run()

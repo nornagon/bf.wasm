@@ -212,6 +212,10 @@ class FuncBody extends Flattenable {
     this.code = new CodeAccumulator()
   }
 
+  addLocal(type, count=1) {
+    this.locals.add(new LocalEntry(count, type)) // $p
+  }
+
   flatten(w) {
     this.locals.flatten(w)
     w.write(this.code.bytes)
@@ -371,6 +375,33 @@ class Module extends Flattenable {
     // element
     this.code_section = mkSection(SECTION_CODE)
     // data
+  }
+
+  addType(type) {
+    this.type_section.add(type)
+    return this.type_section.elements.length - 1
+  }
+
+  addMemory(initial, maximum=null) {
+    this.memory_section.add(new MemoryType(initial, maximum))
+  }
+
+  importFunction(module, field, typeIdx) {
+    this.import_section.add(new ImportEntry(
+      module, field, EXTERNAL_KIND_FUNCTION,
+      new FunctionImportType(typeIdx)
+    ))
+  }
+
+  exportFunction(name, idx) {
+    this.export_section.add(new ExportEntry(name, EXTERNAL_KIND_FUNCTION, idx))
+  }
+
+  addFunction(typeIdx) {
+    this.function_section.add(new Index(typeIdx))
+    const f = new FuncBody()
+    this.code_section.add(new SizedSection(f))
+    return f
   }
 
   flatten(w) {
