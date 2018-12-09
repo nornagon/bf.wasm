@@ -79,6 +79,57 @@ const TYPE_ANYFUNC = -0x10
 const TYPE_FUNC = -0x20
 const TYPE_EMPTY_BLOCK = -0x40
 
+const bytecode = {
+  i32_const(i) {
+    return [0x41, ...varint32(i)]
+  },
+  set_local(i) {
+    return [0x21, ...varuint32(i)]
+  },
+  get_local(i) {
+    return [0x20, ...varuint32(i)]
+  },
+  i32_load8_u(alignment=0, offset=0) {
+    return [0x2d, ...varuint32(alignment), ...varuint32(offset)]
+  },
+  i32_add() {
+    return [0x6a]
+  },
+  i32_sub() {
+    return [0x6b]
+  },
+  i32_store8(alignment=0, offset=0) {
+    return [0x3a, ...varuint32(alignment), ...varuint32(offset)]
+  },
+  i32_eqz() {
+    return [0x45]
+  },
+
+  block(type=TYPE_EMPTY_BLOCK) {
+    return [0x02, ...varint7(type)]
+  },
+  loop(type=TYPE_EMPTY_BLOCK) {
+    return [0x03, ...varint7(type)]
+  },
+  end() {
+    return [0x0b]
+  },
+
+  br_if(i) {
+    return [0x0d, ...varuint32(i)]
+  },
+  br(i) {
+    return [0x0c, ...varuint32(i)]
+  },
+
+  call(i) {
+    return [0x10, ...varuint32(i)]
+  },
+  return() {
+    return [0x0f]
+  }
+}
+
 class Writer {
   constructor(buf) {
     this.buf = buf
@@ -142,16 +193,28 @@ class FuncType extends Flattenable {
   }
 }
 
+class CodeAccumulator {
+  constructor() {
+    this.bytes = []
+  }
+}
+Object.keys(bytecode).forEach(k => {
+  CodeAccumulator.prototype[k] = function (...args) {
+    this.bytes.push(...bytecode[k](...args))
+    return this
+  }
+})
+
 class FuncBody extends Flattenable {
   constructor() {
     super()
     this.locals = new ArraySection
-    this.code = []
+    this.code = new CodeAccumulator()
   }
 
   flatten(w) {
     this.locals.flatten(w)
-    w.write(this.code)
+    w.write(this.code.bytes)
     w.write([0x0b])
   }
 }
@@ -347,4 +410,5 @@ module.exports = {
   varint32,
   varint7,
   varuint32,
+  bytecode,
 }

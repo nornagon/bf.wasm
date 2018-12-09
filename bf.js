@@ -20,12 +20,9 @@ m.memory_section.add(new wasm.MemoryType(1))
 const f = new wasm.FuncBody()
 f.locals.add(new wasm.LocalEntry(1, wasm.type.i32)) // $p
 
-// i32.const 0
-f.code.push(0x41)
-f.code.push(...varint32(0))
-// set_local 0
-f.code.push(0x21)
-f.code.push(...varuint32(0))
+f.code
+  .i32_const(0)
+  .set_local(0)
 
 const bf_string = `
 [ This program prints "Hello World!" and a newline to the screen, its
@@ -76,94 +73,68 @@ Pointer :   ^
 for (let c of bf_string) {
   switch (c) {
     case '+':
-      // get_local $p
-      f.code.push(0x20, ...varuint32(0))
-      // get_local $p
-      f.code.push(0x20, ...varuint32(0))
-      // i32.load8_u 
-      f.code.push(0x2d, /* alignment */...varuint32(0), /* offset */...varuint32(0))
-      // i32.const 1
-      f.code.push(0x41, ...varint32(1))
-      // i32.add
-      f.code.push(0x6a)
-      // i32.store8
-      f.code.push(0x3a, /* alignment */...varuint32(0), /* offset */...varuint32(0))
+      f.code
+        .get_local(0)
+        .get_local(0)
+        .i32_load8_u()
+        .i32_const(1)
+        .i32_add()
+        .i32_store8()
       break;
     case '-':
-      // get_local $p
-      f.code.push(0x20, ...varuint32(0))
-      // get_local $p
-      f.code.push(0x20, ...varuint32(0))
-      // i32.load8_u 
-      f.code.push(0x2d, /* alignment */...varuint32(0), /* offset */...varuint32(0))
-      // i32.const 1
-      f.code.push(0x41, ...varint32(1))
-      // i32.sub
-      f.code.push(0x6b)
-      // i32.store8
-      f.code.push(0x3a, /* alignment */...varuint32(0), /* offset */...varuint32(0))
+      f.code
+        .get_local(0)
+        .get_local(0)
+        .i32_load8_u()
+        .i32_const(1)
+        .i32_sub()
+        .i32_store8()
       break;
     case '>':
-      // get_local $p
-      f.code.push(0x20)
-      f.code.push(...varuint32(0))
-      // i32.const 1
-      f.code.push(0x41)
-      f.code.push(...varint32(1))
-      // i32.add
-      f.code.push(0x6a)
-      // set_local $p
-      f.code.push(0x21)
-      f.code.push(...varuint32(0))
+      f.code
+        .get_local(0)
+        .i32_const(1)
+        .i32_add()
+        .set_local(0)
       break;
     case '<':
-      // get_local $p
-      f.code.push(0x20, ...varuint32(0))
-      // i32.const 1
-      f.code.push(0x41, ...varint32(1))
-      // i32.add
-      f.code.push(0x6b)
-      // set_local $p
-      f.code.push(0x21, ...varuint32(0))
+      f.code
+        .get_local(0)
+        .i32_const(1)
+        .i32_sub()
+        .set_local(0)
       break;
     case '[':
-      // block void
-      f.code.push(0x02, ...varint7(wasm.type.empty_block))
-      // loop void
-      f.code.push(0x03, ...varint7(wasm.type.empty_block))
-      // get_local $p
-      f.code.push(0x20, ...varuint32(0))
-      // i32.load8_u
-      f.code.push(0x2d, /* alignment */...varuint32(0), /* offset */...varuint32(0))
-      // i32.eqz
-      f.code.push(0x45)
-      // br_if 1
-      f.code.push(0x0d, ...varuint32(1))
+      f.code
+        .block()
+        .loop()
+        .get_local(0)
+        .i32_load8_u()
+        .i32_eqz()
+        .br_if(1)
       break;
     case ']':
-      // br 0
-      f.code.push(0x0c, ...varuint32(0))
-      // end
-      f.code.push(0x0b)
-      // end
-      f.code.push(0x0b)
+      f.code
+        .br(0)
+        .end()
+        .end()
       break;
     case '.':
-      // get_local $p
-      f.code.push(0x20, ...varuint32(0))
-      // i32.load8_u
-      f.code.push(0x2d, /* alignment */...varuint32(0), /* offset */...varuint32(0))
-      // call 0
-      f.code.push(0x10, ...varuint32(0))
+      f.code
+        .get_local(0)
+        .i32_load8_u()
+        .call(0)
       break;
     case ',':
+      f.code
+        .call(1)
       break;
     default:
       break;
   }
 }
 
-f.code.push(0x0f) // return
+f.code.return()
 m.code_section.add(new wasm.SizedSection(f))
 
 WebAssembly.instantiate(m.toBuffer(), {
